@@ -1,0 +1,356 @@
+{
+  "id": "24139a50-af2d-476b-93d9-2743285fab1b",
+  "revision": 0,
+  "last_node_id": 11,
+  "last_link_id": 29,
+  "nodes": [
+    {
+      "id": 11,
+      "type": "PrimitiveFloat",
+      "pos": [
+        410.1903381347656,
+        210.4737548828125
+      ],
+      "size": [
+        270,
+        58
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "FLOAT",
+          "type": "FLOAT",
+          "links": [
+            28,
+            29
+          ]
+        }
+      ],
+      "title": "FPS",
+      "properties": {
+        "Node name for S&R": "PrimitiveFloat"
+      },
+      "widgets_values": [
+        25
+      ]
+    },
+    {
+      "id": 4,
+      "type": "LoadAudio",
+      "pos": [
+        403.0230712890625,
+        690.6533203125
+      ],
+      "size": [
+        274.080078125,
+        136
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "AUDIO",
+          "type": "AUDIO",
+          "links": [
+            6,
+            25
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadAudio"
+      },
+      "widgets_values": [
+        "aud-sample-vs-1.wav",
+        null,
+        null
+      ]
+    },
+    {
+      "id": 1,
+      "type": "LoadFloatModels",
+      "pos": [
+        404.4696350097656,
+        877.6525268554688
+      ],
+      "size": [
+        270,
+        58
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "float_pipe",
+          "type": "FLOAT_PIPE",
+          "links": [
+            23
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadFloatModels"
+      },
+      "widgets_values": [
+        "float.pth"
+      ]
+    },
+    {
+      "id": 10,
+      "type": "FloatProcess",
+      "pos": [
+        775.839599609375,
+        385.2976379394531
+      ],
+      "size": [
+        270,
+        266
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "ref_image",
+          "type": "IMAGE",
+          "link": 24
+        },
+        {
+          "name": "ref_audio",
+          "type": "AUDIO",
+          "link": 25
+        },
+        {
+          "name": "float_pipe",
+          "type": "FLOAT_PIPE",
+          "link": 23
+        },
+        {
+          "name": "fps",
+          "type": "FLOAT",
+          "widget": {
+            "name": "fps"
+          },
+          "link": 28
+        }
+      ],
+      "outputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "links": [
+            26
+          ]
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "FloatProcess"
+      },
+      "widgets_values": [
+        2,
+        1,
+        1,
+        25,
+        "disgust",
+        true,
+        982045898717762,
+        "fixed"
+      ]
+    },
+    {
+      "id": 6,
+      "type": "VHS_VideoCombine",
+      "pos": [
+        1102.20068359375,
+        273.52789306640625
+      ],
+      "size": [
+        270,
+        598
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "IMAGE",
+          "link": 26
+        },
+        {
+          "name": "audio",
+          "shape": 7,
+          "type": "AUDIO",
+          "link": 6
+        },
+        {
+          "name": "meta_batch",
+          "shape": 7,
+          "type": "VHS_BatchManager",
+          "link": null
+        },
+        {
+          "name": "vae",
+          "shape": 7,
+          "type": "VAE",
+          "link": null
+        },
+        {
+          "name": "frame_rate",
+          "type": "FLOAT",
+          "widget": {
+            "name": "frame_rate"
+          },
+          "link": 29
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Filenames",
+          "type": "VHS_FILENAMES",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "VHS_VideoCombine"
+      },
+      "widgets_values": {
+        "frame_rate": 25,
+        "loop_count": 0,
+        "filename_prefix": "AnimateDiff",
+        "format": "video/nvenc_h264-mp4",
+        "pix_fmt": "yuv420p",
+        "bitrate": 10,
+        "megabit": true,
+        "save_metadata": true,
+        "pingpong": false,
+        "save_output": true,
+        "videopreview": {
+          "hidden": false,
+          "paused": false,
+          "params": {
+            "filename": "AnimateDiff_00027-audio.mp4",
+            "subfolder": "",
+            "type": "output",
+            "format": "video/nvenc_h264-mp4",
+            "frame_rate": 25,
+            "workflow": "AnimateDiff_00027.png",
+            "fullpath": "/workspace/ComfyUI/output/AnimateDiff_00027-audio.mp4"
+          }
+        }
+      }
+    },
+    {
+      "id": 3,
+      "type": "LoadImage",
+      "pos": [
+        408.3001403808594,
+        327.2937927246094
+      ],
+      "size": [
+        274.080078125,
+        314.0000305175781
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            24
+          ]
+        },
+        {
+          "name": "MASK",
+          "type": "MASK",
+          "links": null
+        }
+      ],
+      "properties": {
+        "Node name for S&R": "LoadImage"
+      },
+      "widgets_values": [
+        "sam_altman_512x512.jpg",
+        "image"
+      ]
+    }
+  ],
+  "links": [
+    [
+      6,
+      4,
+      0,
+      6,
+      1,
+      "AUDIO"
+    ],
+    [
+      23,
+      1,
+      0,
+      10,
+      2,
+      "FLOAT_PIPE"
+    ],
+    [
+      24,
+      3,
+      0,
+      10,
+      0,
+      "IMAGE"
+    ],
+    [
+      25,
+      4,
+      0,
+      10,
+      1,
+      "AUDIO"
+    ],
+    [
+      26,
+      10,
+      0,
+      6,
+      0,
+      "IMAGE"
+    ],
+    [
+      28,
+      11,
+      0,
+      10,
+      3,
+      "FLOAT"
+    ],
+    [
+      29,
+      11,
+      0,
+      6,
+      4,
+      "FLOAT"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "frontendVersion": "1.18.6",
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}
