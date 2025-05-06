@@ -58,6 +58,9 @@ pip install -r requirements.txt
 }
 ```
 
+## Acknowledgments
+Thanks to [simplepod.ai](https://simplepod.ai/) for providing GPU servers
+
 ## License
 
 [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International (CC BY-NC-SA 4.0)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
