@@ -15,11 +15,6 @@ This project provides an unofficial ComfyUI implementation of [FLOAT](https://gi
 </div> 
 
 
-
-
-
-
-
 ## ⭐ Support
 If you like my projects and wish to see updates and new features, please consider supporting me. It helps a lot! 
 
@@ -50,7 +45,8 @@ pip install -r requirements.txt
 ## ☀️ Usage
 
 - Load [example workflow](float_workflow.json) 
-- Upload driving image and audio
+- Upload driving image and audio, click queue
+- Models autodownload to `/ComfyUI/models/float`
   
 ## Citation
 ```bibtex
