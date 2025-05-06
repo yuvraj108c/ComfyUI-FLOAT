@@ -10,9 +10,15 @@
 
 This project provides an unofficial ComfyUI implementation of [FLOAT](https://github.com/deepbrainai-research/float) for Generative Motion Latent Flow Matching for Audio-driven Talking Portrait
 
-<!-- <p align="center">
-  <img src="assets/node_v3.png" style="height: 400px" />
-</p> -->
+<div align="center">
+  <video src="https://github.com/user-attachments/assets/36626b4a-d3e5-4db9-87a7-ca0e949daee0" />
+</div> 
+
+
+
+
+
+
 
 ## ⭐ Support
 If you like my projects and wish to see updates and new features, please consider supporting me. It helps a lot! 
