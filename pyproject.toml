@@ -1,0 +1,15 @@
+[project]
+name = "float"
+description = "This project provides an unofficial ComfyUI implementation of [a/FLOAT](https://github.com/deepbrainai-research/float) for Generative Motion Latent Flow Matching for Audio-driven Talking Portrait"
+version = "1.0.0"
+license = {file = "LICENSE"}
+dependencies = ["opencv-python", "pandas", "matplotlib", "flow-vis", "librosa", "albumentations", "albucore", "torchdiffeq", "timm", "face_alignment", "av==12.0.0"]
+
+[project.urls]
+Repository = "https://github.com/yuvraj108c/ComfyUI-FLOAT"
+#  Used by Comfy Registry https://comfyregistry.org
+
+[tool.comfy]
+PublisherId = ""
+DisplayName = "ComfyUI-FLOAT"
+Icon = ""
