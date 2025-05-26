@@ -14,10 +14,11 @@ from transformers import Wav2Vec2FeatureExtractor
 
 from .models.float.FLOAT import FLOAT
 from .options.base_options import BaseOptions, BaseOptionsJson
+from .resample import resample_audio_numpy
 
 
 # Gemini 2.5 Pro code
-def comfy_audio_to_librosa_mono(comfy_audio_tensor: torch.Tensor) -> np.ndarray:
+def comfy_audio_to_librosa_mono(comfy_audio_tensor: torch.Tensor, cur_sr: int, target_sr: int) -> np.ndarray:
 	"""
 	Converts a ComfyUI audio tensor to a mono NumPy array suitable for Librosa.
 
@@ -68,6 +69,10 @@ def comfy_audio_to_librosa_mono(comfy_audio_tensor: torch.Tensor) -> np.ndarray:
 	# Ensure it's float32, which librosa typically uses, though to_mono usually preserves float type.
 	if mono_waveform_np.dtype != np.float32:
 		mono_waveform_np = mono_waveform_np.astype(np.float32)
+
+	# Make the sample rate match the model training data, Wav2Vec needs 16k
+	if cur_sr != target_sr:
+		mono_waveform_np = resample_audio_numpy(mono_waveform_np, cur_sr, target_sr)
 
 	return mono_waveform_np
 
@@ -120,7 +125,9 @@ class DataProcessor:
 	def default_aud_loader(self, path: Union[str, Dict]) -> torch.Tensor:
 		if isinstance(path, dict):
 			# We support a native ComfyUI audio
-			speech_array, sampling_rate = comfy_audio_to_librosa_mono(path['waveform']), path['sample_rate']
+			# Wav2Vec needs 16k sampling rate
+			speech_array, sampling_rate = comfy_audio_to_librosa_mono(path['waveform'], path['sample_rate'],
+			                                                          self.sampling_rate), self.sampling_rate
 		else:
 			speech_array, sampling_rate = librosa.load(path, sr = self.sampling_rate)
 		print(speech_array)
