@@ -72,11 +72,8 @@ class FloatProcess:
     DESCRIPTION = "Float Processing"
 
     def floatprocess(self, ref_image, ref_audio, float_pipe, a_cfg_scale, r_cfg_scale, e_cfg_scale, fps, emotion, crop, seed):
-        # save audio
         temp_dir = folder_paths.get_temp_directory()
         os.makedirs(temp_dir, exist_ok=True)
-        audio_save_path = os.path.join(temp_dir, f"{int(time.time())}.wav")
-        torchaudio.save(audio_save_path, ref_audio['waveform'].squeeze(0), ref_audio["sample_rate"])
 
         # save image
         if ref_image.shape[0] != 1:
@@ -91,7 +88,7 @@ class FloatProcess:
         images_bhwc = float_pipe.run_inference(
             None,
             image_save_path,
-            audio_save_path,
+            ref_audio,
             a_cfg_scale = a_cfg_scale,
             r_cfg_scale = r_cfg_scale,
             e_cfg_scale = e_cfg_scale,
