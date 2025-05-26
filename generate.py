@@ -4,6 +4,7 @@
 
 import os, torch, random, cv2, torchvision, subprocess, librosa, datetime, tempfile, face_alignment
 import numpy as np
+os.environ['NO_ALBUMENTATIONS_UPDATE'] = '1'  # Disable albumentations regretable behavior that checks internet
 import albumentations as A
 import albumentations.pytorch.transforms as A_pytorch
 
