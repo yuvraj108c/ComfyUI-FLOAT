@@ -6,6 +6,6 @@ librosa
 albumentations
 albucore
 torchdiffeq
-timm
+timm>=1.0.9
 face_alignment
 av==12.0.0
