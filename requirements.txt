@@ -8,4 +8,3 @@ albucore
 torchdiffeq
 timm
 face_alignment
-av==12.0.0
