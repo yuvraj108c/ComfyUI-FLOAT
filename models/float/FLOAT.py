@@ -61,20 +61,30 @@ class FLOAT(BaseModel):
 		# print("starting decoding")
 		# start = time.time()
 		
-		T = r_d.shape[1]
+		T = r_d.shape[1] # r_d is on GPU
 		pbar = ProgressBar(T) # only for decoding latents, encoding + inference is pretty fast
-		d_hat = []
+		d_hat_list_cpu = [] # List to accumulate frames on CPU
 		for t in range(T):
-			s_r_d_t = s_r + r_d[:, t]
-			img_t, _ = self.motion_autoencoder.dec(s_r_d_t, alpha = None, feats = s_r_feats)
-			d_hat.append(img_t)
+			s_r_d_t = s_r + r_d[:, t] # Operation on GPU
+			img_t_gpu, _ = self.motion_autoencoder.dec(s_r_d_t, alpha = None, feats = s_r_feats) # img_t_gpu is on GPU
+			d_hat_list_cpu.append(img_t_gpu.cpu()) # Move the generated frame to CPU and add it to the list
+			
+			# Free intermediate GPU tensors as soon as possible within the loop
+			del s_r_d_t, img_t_gpu
+			if torch.cuda.is_available() and (t % 10 == 0 or t == T -1) : # Empty cache periodically or at the end
+				torch.cuda.empty_cache()
+				
 			pbar.update(1)
-		d_hat = torch.stack(d_hat, dim=1).squeeze()
+
+		# s_r, r_d, s_r_feats are arguments passed to this function and are on GPU.
+		# Their cleanup will happen in the calling method (inference) after this function returns.
+
+		d_hat_stacked_cpu = torch.stack(d_hat_list_cpu, dim=1).squeeze() # Stacking happens on CPU
 		# end = time.time()
 		
 		# print(end-start, "decoding done")
-
-		return {'d_hat': d_hat}
+		# The result 'd_hat' is now a CPU tensor.
+		return {'d_hat': d_hat_stacked_cpu}
 
 
 	######## Motion Sampling and Inference ########
@@ -87,55 +97,63 @@ class FLOAT(BaseModel):
 		e_cfg_scale: float = 1.0,
 		emo: str = None,
 		nfe: int = 10,
-		seed: int = None
+		seed_arg: int = None # Renamed seed to avoid conflict with self.opt.seed
 	) -> torch.Tensor:
 
-		r_s, a = data['r_s'], data['a']
-		B = a.shape[0]
+		r_s, a_cpu = data['r_s'], data['a'] # r_s is on GPU, a_cpu is on CPU
+		B = a_cpu.shape[0]
 
 		# make time 
-		time = torch.linspace(0, 1, self.opt.nfe, device=self.opt.rank)
+		time_steps = torch.linspace(0, 1, nfe, device=self.opt.rank) # Use nfe from arguments
 		
 		# encoding audio first with whole audio
-		a = a.to(self.opt.rank)
-		T = math.ceil(a.shape[-1] * self.opt.fps / self.opt.sampling_rate)
-		wa = self.audio_encoder.inference(a, seq_len=T)
+		a_gpu = a_cpu.to(self.opt.rank)
+		T = math.ceil(a_gpu.shape[-1] * self.opt.fps / self.opt.sampling_rate)
+		wa = self.audio_encoder.inference(a_gpu, seq_len=T) # wa is on GPU
 
 		# encoding emotion first
 		emo_idx = self.emotion_encoder.label2id.get(str(emo).lower(), None)
 		if emo_idx is None:
-			we = self.emotion_encoder.predict_emotion(a).unsqueeze(1)
+			we = self.emotion_encoder.predict_emotion(a_gpu).unsqueeze(1) # we is on GPU
 		else:
-			we = F.one_hot(torch.tensor(emo_idx, device = a.device), num_classes = self.opt.dim_e).unsqueeze(0).unsqueeze(0)
+			we = F.one_hot(torch.tensor(emo_idx, device = a_gpu.device), num_classes = self.opt.dim_e).unsqueeze(0).unsqueeze(0) # we is on GPU
 
-		sample = []
+		del a_gpu # Free VRAM from a_gpu
+		if torch.cuda.is_available():
+			torch.cuda.empty_cache()
+
+		# r_s is already on GPU
+		# wa is on GPU
+		# we is on GPU
+
+		sample_list = []
 		# sampleing chunk by chunk
-		for t in range(0, int(math.ceil(T / self.num_frames_for_clip))):
+		for t_loop_idx in range(0, int(math.ceil(T / self.num_frames_for_clip))):
 			if self.opt.fix_noise_seed:
-				seed = self.opt.seed if seed is None else seed	
+				current_seed = self.opt.seed if seed_arg is None else seed_arg # Use seed_arg from arguments
 				g = torch.Generator(self.opt.rank)
-				g.manual_seed(seed)
+				g.manual_seed(current_seed)
 				x0 = torch.randn(B, self.num_frames_for_clip, self.opt.dim_w, device = self.opt.rank, generator = g)
 			else:
 				x0 = torch.randn(B, self.num_frames_for_clip, self.opt.dim_w, device = self.opt.rank)
 
-			if t == 0: # should define the previous
+			if t_loop_idx == 0: # should define the previous
 				prev_x_t = torch.zeros(B, self.num_prev_frames, self.opt.dim_w).to(self.opt.rank)
 				prev_wa_t = torch.zeros(B, self.num_prev_frames, self.opt.dim_w).to(self.opt.rank)
 			else:
 				prev_x_t = sample_t[:, -self.num_prev_frames:]
-				prev_wa_t = wa_t[:, -self.num_prev_frames:]
+				prev_wa_t = wa_t_chunk[:, -self.num_prev_frames:] # Use wa_t_chunk from previous iteration
 			
-			wa_t = wa[:, t * self.num_frames_for_clip: (t+1)*self.num_frames_for_clip]
+			wa_t_chunk = wa[:, t_loop_idx * self.num_frames_for_clip: (t_loop_idx+1)*self.num_frames_for_clip]
 
-			if wa_t.shape[1] < self.num_frames_for_clip: # padding by replicate
-				wa_t = F.pad(wa_t, (0, 0, 0, self.num_frames_for_clip - wa_t.shape[1]), mode='replicate')
+			if wa_t_chunk.shape[1] < self.num_frames_for_clip: # padding by replicate
+				wa_t_chunk = F.pad(wa_t_chunk, (0, 0, 0, self.num_frames_for_clip - wa_t_chunk.shape[1]), mode='replicate')
 
-			def sample_chunk(tt, zt):
+			def ode_fn(tt, zt):
 				out = self.fmt.forward_with_cfv(
 						t 			= tt.unsqueeze(0),
 						x 			= zt,
-						wa 			= wa_t, 			 
+						wa 			= wa_t_chunk,
 						wr 			= r_s,
 						we 			= we, 
 						prev_x 		= prev_x_t, 	
@@ -149,11 +167,16 @@ class FLOAT(BaseModel):
 				return out_current
 
 			# solve ODE
-			trajectory_t = odeint(sample_chunk, x0, time, **self.odeint_kwargs)
+			trajectory_t = odeint(ode_fn, x0, time_steps, **self.odeint_kwargs) # Use time_steps
 			sample_t = trajectory_t[-1]
-			sample.append(sample_t)
-		sample = torch.cat(sample, dim=1)[:, :T]
-		return sample
+			# trajectory_t can be large, delete it if only the last step is needed
+			del trajectory_t
+			if torch.cuda.is_available():
+				torch.cuda.empty_cache()
+
+			sample_list.append(sample_t)
+		final_sample = torch.cat(sample_list, dim=1)[:, :T]
+		return final_sample
 
 	@torch.no_grad()
 	def inference(
@@ -167,34 +190,77 @@ class FLOAT(BaseModel):
 		seed		= None,
 	) -> dict:
 
-		s, a = data['s'], data['a']
+		s_cpu, a_cpu = data['s'], data['a'] # s_cpu and a_cpu are on CPU from DataProcessor
 
-
+		s_img_gpu = s_cpu.to(self.opt.rank) # Source image on GPU
 		# print("starting encoding")
 		# start = time.time()
-		s_r, r_s_lambda, s_r_feats = self.encode_image_into_latent(s.to(self.opt.rank))
+		# s_r, s_r_feats are for the final image decoding and come from s_img_gpu
+		# r_s_lambda_from_s_img is the motion lambda calculated from s_img_gpu
+		s_r, r_s_lambda_from_s_img, s_r_feats = self.encode_image_into_latent(s_img_gpu)
 		# end = time.time()
 		# print(end-start, "encoding end")
+		del s_img_gpu # Free VRAM from the source GPU image
+		if torch.cuda.is_available():
+			torch.cuda.empty_cache()
 
-		if 's_r' in data:
-			r_s = self.encode_identity_into_motion(s_r)
+		r_s_style_source_gpu = None # To track if we create a temporary tensor for the style
+		# Determine r_s based on whether s_r is already provided in data
+		# s_r would be on GPU if pre-calculated, r_s_lambda is already on GPU
+		if 's_r' in data and data['s_r'] is not None:
+			# The motion style r_s comes from an external reference data['s_r']
+			r_s_style_source_gpu = data['s_r'].to(self.opt.rank)
+			r_s = self.encode_identity_into_motion(r_s_style_source_gpu)
+			# r_s_lambda_from_s_img is not used to calculate r_s in this branch
 		else:
-			r_s = self.motion_autoencoder.dec.direction(r_s_lambda)
-		data['r_s'] = r_s
+			# The motion style r_s comes from the source image s_cpu (via r_s_lambda_from_s_img)
+			r_s = self.motion_autoencoder.dec.direction(r_s_lambda_from_s_img)
+		
+		# r_s is now defined and on GPU.
+
+		# Prepare data for the sample method.
+		# 'a' (audio) will be handled by the sample method (moved to GPU there).
+		# 'r_s' (reference style) is on GPU.
+		# We update/add 'r_s' to the data dictionary that will be passed to self.sample.
+		# Other elements from the original `data` dict are passed along.
+		data_for_sample = data.copy() # Avoid modifying the input dict directly if it's used elsewhere, though original code modifies it.
+		data_for_sample['r_s'] = r_s 
+		data_for_sample['a'] = a_cpu # Ensure 'a' is the CPU tensor for sample method
 
 
 		# set conditions
 		if a_cfg_scale is None: a_cfg_scale = self.opt.a_cfg_scale
 		if r_cfg_scale is None: r_cfg_scale = self.opt.r_cfg_scale
 		if e_cfg_scale is None: e_cfg_scale = self.opt.e_cfg_scale
+		
 		# print("starting actual inference")
 		# start = time.time()
-		sample = self.sample(data, a_cfg_scale = a_cfg_scale, r_cfg_scale = r_cfg_scale, e_cfg_scale = e_cfg_scale, emo = emo, nfe = nfe, seed = seed)
+		sample_result = self.sample(
+			data_for_sample, # Pass the prepared dictionary
+			a_cfg_scale = a_cfg_scale, 
+			r_cfg_scale = r_cfg_scale, 
+			e_cfg_scale = e_cfg_scale, 
+			emo = emo, 
+			nfe = nfe, 
+			seed_arg = seed # Pass seed as seed_arg
+		)
 		# end = time.time()
 		# print(end-start, "actual inference")
-		data_out = self.decode_latent_into_image(s_r = s_r, s_r_feats = s_r_feats, r_d = sample)
+		# s_r, s_r_feats (from the source image s_cpu) are used for decoding. sample_result is on GPU.
+		data_out_dict = self.decode_latent_into_image(s_r = s_r, s_r_feats = s_r_feats, r_d = sample_result)
+        # data_out_dict['d_hat'] is now on CPU thanks to changes in decode_latent_into_image
 
-		return data_out
+		# Final cleanup of GPU tensors no longer needed
+		del s_r, s_r_feats, sample_result, r_s
+		if r_s_style_source_gpu is not None:
+			del r_s_style_source_gpu
+		# r_s_lambda_from_s_img was used (or not used) to calculate r_s. It can be deleted.
+		del r_s_lambda_from_s_img
+            
+		if torch.cuda.is_available():
+			torch.cuda.empty_cache()
+
+		return data_out_dict # {'d_hat': tensor_on_CPU}
 
 
 
