@@ -209,7 +209,7 @@ class AudioEncoder(BaseModel):
 		self.num_frames_for_clip = int(opt.wav2vec_sec * self.opt.fps)
 		self.num_prev_frames = int(opt.num_prev_frames)
 
-		self.wav2vec2 = Wav2VecModel.from_pretrained(opt.wav2vec_model_path, local_files_only = True)
+		self.wav2vec2 = Wav2VecModel.from_pretrained(opt.wav2vec_model_path, local_files_only = True, attn_implementation="eager")
 		self.wav2vec2.feature_extractor._freeze_parameters()
 
 		for name, param in self.wav2vec2.named_parameters():
@@ -257,7 +257,7 @@ class AudioEncoder(BaseModel):
 class Audio2Emotion(nn.Module):
     def __init__(self, opt):
         super().__init__()
-        self.wav2vec2_for_emotion = Wav2Vec2ForSpeechClassification.from_pretrained(opt.audio2emotion_path, local_files_only=True)
+        self.wav2vec2_for_emotion = Wav2Vec2ForSpeechClassification.from_pretrained(opt.audio2emotion_path, local_files_only=True, attn_implementation="eager")
         self.wav2vec2_for_emotion.eval()
         
 		# seven labels

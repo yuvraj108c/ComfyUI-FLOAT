@@ -34,7 +34,7 @@ class LoadFloatModels:
 
         if not os.path.exists(float_model_path) or not os.path.isdir(wav2vec2_base_960h_models_dir) or not os.path.isdir(wav2vec_english_speech_emotion_recognition_models_dir):
             from huggingface_hub import snapshot_download
-            snapshot_download(repo_id="yuvraj108c/float", local_dir=float_models_dir, local_dir_use_symlinks=False)
+            snapshot_download(repo_id="yuvraj108c/float", local_dir=float_models_dir)
 
         # use custom dictionary instead of original parser for arguments
         opt = BaseOptionsJson

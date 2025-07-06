@@ -9,6 +9,9 @@
 </div>
 
 This project provides a ComfyUI wrapper of [FLOAT](https://github.com/deepbrainai-research/float) for Generative Motion Latent Flow Matching for Audio-driven Talking Portrait
+For 
+
+For a more advanced and maintained version, check out: [ComfyUI-FLOAT_Optimized](https://github.com/set-soft/ComfyUI-FLOAT_Optimized)
 
 <div align="center">
   <video src="https://github.com/user-attachments/assets/36626b4a-d3e5-4db9-87a7-ca0e949daee0" />
@@ -46,8 +49,30 @@ pip install -r requirements.txt
 
 - Load [example workflow](float_workflow.json) 
 - Upload driving image and audio, click queue
-- Models autodownload to `/ComfyUI/models/float`
-  
+- [Models](https://huggingface.co/yuvraj108c/float/tree/main) autodownload to `/ComfyUI/models/float`
+- The models are organized as follows:
+    ```.bash
+    |-- float.pth                                       # main model
+    |-- wav2vec2-base-960h/                             # audio encoder
+    |   |-- config.json
+    |   |-- model.safetensors
+    |   |-- preprocessor_config.json
+    |-- wav2vec-english-speech-emotion-recognition/     # emotion encoder
+        |-- config.json
+        |-- preprocessor_config.json
+        |-- pytorch_model.bin
+
+## 🛠️ Parameters
+- `ref_image`: Reference image with a face (must have batch size 1)
+- `ref_audio`: Reference audio (For long audios (e.g 3+ minutes), ensure that you have enough ram/vram)
+- `a_cfg_scale`: Audio classifier-free guidance scale (default:2)
+- `r_cfg_scale`: Reference classifier-free guidance scale (default:1)
+- `emotion`: none, angry, disgust, fear, happy, neutral, sad, surprise (default:none)
+- `e_cfg_scale`: Intensity of emotion (default:1). For more emotion intensive video, try large value from 5 to 10
+- `crop`: Enable only if the reference image does not have a centered face
+- `fps`: Frame rate of the output video (default:25)
+
+   
 ## Citation
 ```bibtex
 @article{ki2024float,
