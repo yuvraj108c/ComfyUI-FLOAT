@@ -46,8 +46,20 @@ pip install -r requirements.txt
 
 - Load [example workflow](float_workflow.json) 
 - Upload driving image and audio, click queue
-- Models autodownload to `/ComfyUI/models/float`
-  
+- [Models](https://huggingface.co/yuvraj108c/float/tree/main) autodownload to `/ComfyUI/models/float`
+- The checkpoints should be organized as follows:
+    ```.bash
+    ./checkpints
+    |-- float.pth                                       # main model
+    |-- wav2vec2-base-960h/                             # audio encoder
+    |   |-- config.json
+    |   |-- model.safetensors
+    |   |-- preprocessor_config.json
+    '-- wav2vec-english-speech-emotion-recognition/     # emotion encoder
+        |-- config.json
+        |-- preprocessor_config.json
+        |-- pytorch_model.bin
+
 ## Citation
 ```bibtex
 @article{ki2024float,
