@@ -1,3 +1,34 @@
+
+<div align="right">
+  <details>
+    <summary >🌐 Language</summary>
+    <div>
+      <div align="right">
+        <p><a href="https://openaitx.github.io/view.html?user=yuvraj108c&project=ComfyUI-FLOAT&lang=en">English</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=yuvraj108c&project=ComfyUI-FLOAT&lang=zh-CN">简体中文</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=yuvraj108c&project=ComfyUI-FLOAT&lang=zh-TW">繁體中文</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=yuvraj108c&project=ComfyUI-FLOAT&lang=ja">日本語</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=yuvraj108c&project=ComfyUI-FLOAT&lang=ko">한국어</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=yuvraj108c&project=ComfyUI-FLOAT&lang=hi">हिन्दी</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=yuvraj108c&project=ComfyUI-FLOAT&lang=th">ไทย</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=yuvraj108c&project=ComfyUI-FLOAT&lang=fr">Français</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=yuvraj108c&project=ComfyUI-FLOAT&lang=de">Deutsch</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=yuvraj108c&project=ComfyUI-FLOAT&lang=es">Español</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=yuvraj108c&project=ComfyUI-FLOAT&lang=it">Itapano</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=yuvraj108c&project=ComfyUI-FLOAT&lang=ru">Русский</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=yuvraj108c&project=ComfyUI-FLOAT&lang=pt">Português</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=yuvraj108c&project=ComfyUI-FLOAT&lang=nl">Nederlands</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=yuvraj108c&project=ComfyUI-FLOAT&lang=pl">Polski</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=yuvraj108c&project=ComfyUI-FLOAT&lang=ar">العربية</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=yuvraj108c&project=ComfyUI-FLOAT&lang=fa">فارسی</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=yuvraj108c&project=ComfyUI-FLOAT&lang=tr">Türkçe</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=yuvraj108c&project=ComfyUI-FLOAT&lang=vi">Tiếng Việt</a></p>
+        <p><a href="https://openaitx.github.io/view.html?user=yuvraj108c&project=ComfyUI-FLOAT&lang=id">Bahasa Indonesia</a></p>
+      </div>
+    </div>
+  </details>
+</div>
+
 <div align="center">
 
 # ComfyUI FLOAT 
