@@ -8,3 +8,4 @@ albucore
 torchdiffeq
 timm>=1.0.9
 face_alignment
+torchcodec
