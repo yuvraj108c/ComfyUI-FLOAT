@@ -12,6 +12,8 @@ This project provides a ComfyUI wrapper of [FLOAT](https://github.com/deepbraina
 
 For a more advanced and maintained version, check out: [ComfyUI-FLOAT_Optimized](https://github.com/set-soft/ComfyUI-FLOAT_Optimized)
 
+**Last tested**: 2 January 2026 (ComfyUI v0.7.0@f2fda02 | Torch 2.9.1 | Python 3.10.12 | RTX4090 | CUDA 13.0 | Debian 12)
+
 <div align="center">
   <video src="https://github.com/user-attachments/assets/36626b4a-d3e5-4db9-87a7-ca0e949daee0" />
 </div> 
