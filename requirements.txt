@@ -9,3 +9,4 @@ torchdiffeq
 timm>=1.0.9
 face_alignment
 torchcodec
+transformers<5.0.0
